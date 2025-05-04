@@ -1,40 +1,40 @@
-import { GameButton } from './components/GameButton.js';
+import { createGameButton } from './components/GameButton.js';
 
-const games = [
-  { title: 'From Below (NES)', path: 'roms/Metroid.nes' }
+const romList = [
+  { name: 'Game 1', file: 'test.nes' },
+  { name: 'Game 2', file: 'Metroid.nes' }
 ];
 
 const nes = new jsnes.NES({
   onFrame: function(frameBuffer) {
     const canvas = document.getElementById('nes-canvas');
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, 256, 240);
+    const context = canvas.getContext('2d');
+    const imageData = context.createImageData(256, 240);
     for (let i = 0; i < frameBuffer.length; i++) {
       imageData.data[i] = frameBuffer[i];
     }
-    ctx.putImageData(imageData, 0, 0);
-  },
-  onAudioSample: function() {
-    // Audio handling can be implemented here
+    context.putImageData(imageData, 0, 0);
   }
 });
 
-function loadGame(romPath) {
-  fetch(romPath)
+function loadROM(file) {
+  fetch(`roms/${file}`)
     .then(response => response.arrayBuffer())
     .then(buffer => {
-      nes.loadROM(buffer);
+      const base64ROM = arrayBufferToBase64(buffer);
+      nes.loadROM(base64ROM); // jsNES expects a base64 string
       nes.start();
-    })
-    .catch(err => console.error('Failed to load ROM:', err));
+    });
 }
 
-function init() {
-  const gameList = document.getElementById('game-list');
-  games.forEach(game => {
-    const button = GameButton(game.title, game.path, loadGame);
-    gameList.appendChild(button);
-  });
+function arrayBufferToBase64(buffer) {
+  const binary = new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '');
+  return btoa(binary);
 }
 
-init();
+
+const buttonsDiv = document.getElementById('buttons');
+romList.forEach(rom => {
+  const btn = createGameButton(rom.name, () => loadROM(rom.file));
+  buttonsDiv.appendChild(btn);
+});

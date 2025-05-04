@@ -1,8 +1,6 @@
-export function GameButton(title, romPath, loadGameFn) {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-light m-2';
-    btn.textContent = title;
-    btn.onclick = () => loadGameFn(romPath);
-    return btn;
-  }
-  
+export function createGameButton(title, onClick) {
+  const button = document.createElement('button');
+  button.textContent = title;
+  button.onclick = onClick;
+  return button;
+}
